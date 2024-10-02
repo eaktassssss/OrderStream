@@ -1,0 +1,6 @@
+@OrderStream.Host_HostAddress = http://localhost:5233
+
+GET {{OrderStream.Host_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
