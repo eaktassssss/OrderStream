@@ -141,7 +141,7 @@ namespace OrderStream.Tests.ServiceTests
 
         [Theory]
         [InlineData("66f037e7a04b71bfcaad6487")]
-        public void GetProductById_Invalid_ProductId_ReturnProduct(string id)
+        public void GetProductById_Valid_ProductId_ReturnProduct(string id)
         {
 
             _fixture.ProductRepositoryMock
