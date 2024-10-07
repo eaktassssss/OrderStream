@@ -1,6 +1,9 @@
 ﻿using Moq;
+using OrderStream.Application.Interfaces.Repositories;
 using OrderStream.Application.Models;
+using OrderStream.Application.Services;
 using OrderStream.Domain.Entities;
+using OrderStream.Infrastructure.Implementations.Services;
 using OrderStream.Tests.Fixtures;
 using System;
 using System.Collections.Generic;
