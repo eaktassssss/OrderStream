@@ -18,7 +18,7 @@ namespace OrderStream.Infrastructure.Implementations.Services
         {
             if (string.IsNullOrWhiteSpace(product.Name)) return false;
             if (product.Price <= 0) return false;
-            if (product.StockQuantity < 0) return false;
+            if (product.StockQuantity <= 0) return false;
 
             var newProduct = new Product
             {
@@ -34,6 +34,9 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public ProductModel GetProductById(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return null;
+
             var existingProduct = _productRepository.GetById(id);
             if (existingProduct == null) return null;
 
