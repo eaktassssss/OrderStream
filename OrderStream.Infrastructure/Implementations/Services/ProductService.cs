@@ -62,7 +62,7 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool UpdateProduct(ProductModel product)
         {
-            if (string.IsNullOrWhiteSpace(product.Name) || product.Price <= 0 || product.StockQuantity < 0)
+            if (string.IsNullOrWhiteSpace(product.Name) || product.Price <= 0 || product.StockQuantity <= 0)
                 return false;
 
             var existingProduct = _productRepository.GetById(product.Id);
@@ -77,6 +77,8 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool DeleteProduct(string id)
         {
+            if (string.IsNullOrEmpty(id)) return false;
+
             var existingProduct = _productRepository.GetById(id);
             if (existingProduct == null) return false;
 
@@ -85,6 +87,11 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool RestockProduct(string productId, int quantity)
         {
+            if (quantity <= 0) return false;
+
+            if (string.IsNullOrWhiteSpace(productId)) return false;
+
+
             var product = _productRepository.GetById(productId);
             if (product == null || quantity <= 0) return false;
 
@@ -94,6 +101,11 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool DiscountProduct(string productId, decimal discountPercentage)
         {
+
+            if (string.IsNullOrEmpty(productId)) return false;
+
+            if (discountPercentage <= 0 || discountPercentage > 100) return false;
+
             var product = _productRepository.GetById(productId);
             if (product == null || discountPercentage <= 0 || discountPercentage > 100) return false;
 
@@ -101,19 +113,21 @@ namespace OrderStream.Infrastructure.Implementations.Services
             return _productRepository.Update(product);
         }
 
-        public IEnumerable<ProductModel> GetOutOfStockProducts()
-        {
-            return _productRepository.GetAll().Where(p => p.StockQuantity == 0).Select(product => new ProductModel
+            public IEnumerable<ProductModel> GetOutOfStockProducts()
             {
-                Id = product.Id,
-                Name = product.Name,
-                Price = product.Price,
-                StockQuantity = product.StockQuantity
-            }).ToList();
-        }
+                return _productRepository.GetAll().Where(p => p.StockQuantity == 0).Select(product => new ProductModel
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Price = product.Price,
+                    StockQuantity = product.StockQuantity
+                }).ToList();
+            }
 
         public bool ArchiveProduct(string productId)
         {
+            if (string.IsNullOrEmpty(productId)) return false;
+
             var product = _productRepository.GetById(productId);
             if (product == null) return false;
 
@@ -131,7 +145,7 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
             foreach (var product in products)
             {
-                if (string.IsNullOrWhiteSpace(product.Name) || product.Price <= 0 || product.StockQuantity < 0)
+                if (string.IsNullOrWhiteSpace(product.Name) || product.Price <= 0 || product.StockQuantity <= 0)
                 {
                     return false; // Geçersiz bir ürün varsa işlem başarısız olur
                 }
@@ -142,12 +156,9 @@ namespace OrderStream.Infrastructure.Implementations.Services
                 existingProduct.Name = product.Name;
                 existingProduct.Price = product.Price;
                 existingProduct.StockQuantity = product.StockQuantity;
-                var updateResult = _productRepository.Update(existingProduct);
-
-                if (!updateResult)
-                    return false;
+                _productRepository.Update(existingProduct);
             }
-            return true;
+            return result;
         }
     }
 }
