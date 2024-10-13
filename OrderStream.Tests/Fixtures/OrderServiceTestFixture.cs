@@ -23,6 +23,9 @@ namespace OrderStream.Tests.Fixtures
             OrderRepositoryMock = new Mock<IOrderRepository>();
             OrderService = new OrderService(OrderRepositoryMock.Object, ProductRepositoryMock.Object);
         }
-
+        public T CreateModelInstance<T>() where T : new()
+        {
+            return new T();
+        }
     }
 }
