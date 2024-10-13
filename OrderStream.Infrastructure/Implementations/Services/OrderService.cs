@@ -19,6 +19,8 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool CreateOrder(OrderModel order)
         {
+            if (order == null) return false;
+
             if (order.CustomerId <= 0) return false;
             if (order.Items == null || !order.Items.Any()) return false;
 
@@ -55,6 +57,8 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public OrderModel GetOrderById(string id)
         {
+            if (string.IsNullOrEmpty(id)) return null;
+
             OrderModel order = null;
             var existingOrder = _orderRepository.GetById(id);
             if (existingOrder == null) return null;
@@ -113,6 +117,7 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public IEnumerable<OrderModel> GetPendingOrders()
         {
+
             return _orderRepository.GetAll().Where(o => o.OrderStatus == OrderStatus.Pending).Select(order => new OrderModel
             {
                 CustomerId = order.CustomerId,
@@ -130,6 +135,8 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool CancelOrder(string orderId)
         {
+            if (string.IsNullOrEmpty(orderId)) return false;
+
             var existingOrder = _orderRepository.GetById(orderId);
             if (existingOrder == null) return false;
 
@@ -139,6 +146,9 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool CompleteOrder(string orderId)
         {
+            if (string.IsNullOrEmpty(orderId)) return false;
+
+
             var existingOrder = _orderRepository.GetById(orderId);
             if (existingOrder == null) return false;
 
@@ -159,6 +169,10 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool UpdateOrderItems(string orderId, List<OrderItemModel> updatedItems)
         {
+            if (string.IsNullOrEmpty(orderId)) return false;
+
+            if (updatedItems == null || !updatedItems.Any()) return false;
+
             var existingOrder = _orderRepository.GetById(orderId);
             if (existingOrder == null) return false;
 
@@ -181,6 +195,8 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool ChangeOrderStatus(string orderId, OrderStatus newStatus)
         {
+            if (orderId == null) return false;
+
             var existingOrder = _orderRepository.GetById(orderId);
             if (existingOrder == null) return false;
 
@@ -190,6 +206,8 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool RefundOrder(string orderId)
         {
+            if (string.IsNullOrEmpty(orderId)) return false;
+
             var existingOrder = _orderRepository.GetById(orderId);
             if (existingOrder == null || existingOrder.OrderStatus != OrderStatus.Completed) return false;
 
@@ -199,6 +217,8 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool ReopenOrder(string orderId)
         {
+            if (string.IsNullOrEmpty(orderId)) return false;
+
             var existingOrder = _orderRepository.GetById(orderId);
             if (existingOrder == null || existingOrder.OrderStatus != OrderStatus.Cancelled) return false;
 
@@ -208,6 +228,8 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool DeleteOrder(string orderId)
         {
+            if(string.IsNullOrEmpty(orderId)) return false;
+
             var existingOrder = _orderRepository.GetById(orderId);
             if (existingOrder == null) return false;
 
@@ -216,6 +238,10 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool ProcessOrderInStages(string orderId, List<OrderStatus> stages)
         {
+            if (string.IsNullOrEmpty(orderId)) return false;
+
+            if (stages == null || !stages.Any()) return false;
+
             var existingOrder = _orderRepository.GetById(orderId);
             if (existingOrder == null) return false;
 
@@ -243,6 +269,8 @@ namespace OrderStream.Infrastructure.Implementations.Services
         /// <returns></returns>
         public bool AdjustProductPricingBasedOnStock(string productId, int lowStockThreshold, decimal priceIncreasePercentage, int highStockThreshold, decimal priceDecreasePercentage)
         {
+            if (string.IsNullOrEmpty(productId)) return false;
+
             var product = _productRepository.GetById(productId);
             if (product == null) return false;
 
@@ -261,6 +289,10 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool PartialShipOrder(string orderId, List<OrderItemModel> shippedItems)
         {
+            if (string.IsNullOrEmpty(orderId)) return false;
+
+            if (shippedItems == null || !shippedItems.Any()) return false;
+
             var existingOrder = _orderRepository.GetById(orderId);
             if (existingOrder == null || existingOrder.OrderStatus != OrderStatus.Pending) return false;
 
@@ -295,6 +327,10 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool ReturnOrder(string orderId, List<OrderItemModel> returnedItems)
         {
+            if (string.IsNullOrEmpty(orderId)) return false;
+
+            if (returnedItems == null || !returnedItems.Any()) return false;
+
             bool productUpdate = true;
 
             var existingOrder = _orderRepository.GetById(orderId);
@@ -327,6 +363,7 @@ namespace OrderStream.Infrastructure.Implementations.Services
         /// <returns></returns>
         public bool DiscontinueLowSellingProducts(int salesThreshold)
         {
+
             var products = _productRepository.GetAll();
             foreach (var product in products)
             {
