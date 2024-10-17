@@ -483,7 +483,7 @@ namespace OrderStream.Tests.ServiceTests
         }
 
 
- 
+
 
 
         [Theory]
@@ -509,6 +509,51 @@ namespace OrderStream.Tests.ServiceTests
             Assert.True(result);
         }
 
+        #endregion
+
+        #region GetAllOrders
+        [Fact]
+        public void GetAllOrders_ReturnOrders()
+        {
+            var orders = _fixture.CreateModelInstance<List<Order>>();
+
+
+            orders = new List<Order>
+            {
+                new Order { Id = "66f037e7a04b71bfcaad6487", CustomerId = 1, OrderDate = DateTime.Now, OrderStatus = Domain.Enums.OrderStatus.Completed, TotalAmount = 1000, OrderItems = new List<OrderItem> { new OrderItem { Price = 50, ProductId = "66f037e7a04b71bfcaad6483", Quantity = 20 } } },
+                new Order { Id = "66f037e7a04b71bfcaad6488", CustomerId = 2, OrderDate = DateTime.Now, OrderStatus = Domain.Enums.OrderStatus.Completed, TotalAmount = 2000, OrderItems = new List<OrderItem> { new OrderItem { Price = 100, ProductId = "66f037e7a04b71bfcaad6484", Quantity = 20 } } }
+            };
+
+            _fixture.OrderRepositoryMock
+                .Setup(x => x.GetAll())
+                .Returns(orders);
+
+            var result = _fixture.OrderService.GetAllOrders();
+
+            Assert.NotNull(result);
+            Assert.IsType<List<OrderModel>>(result);
+            Assert.Equal(2, result.Count());
+            Assert.True(result.Any());
+        }
+
+
+        [Fact]
+        public void GetAllOrders_ReturnEmptyList()
+        {
+            var orders = _fixture.CreateModelInstance<List<Order>>();
+
+            orders = new List<Order>();
+
+            _fixture.OrderRepositoryMock
+                .Setup(x => x.GetAll())
+                .Returns(orders);
+
+            var result = _fixture.OrderService.GetAllOrders();
+
+            Assert.NotNull(result);
+            Assert.IsType<List<OrderModel>>(result);
+            Assert.Empty(result);
+        }
         #endregion
     }
 }
