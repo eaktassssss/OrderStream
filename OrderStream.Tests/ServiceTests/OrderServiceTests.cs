@@ -173,5 +173,43 @@ namespace OrderStream.Tests.ServiceTests
         }
         #endregion
 
+        #region GetOrderById
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void GetOrderById_IsNullOrEmpty_ReturnFalse(string id)
+        {
+            var result = _fixture.OrderService.GetOrderById(id);
+
+            Assert.Null(result);
+        }
+        [Theory]
+        [InlineData("66f037e7a04b71bfcaad6487")]
+        public void GetOrderById_NotExistingOrder_ReturnFalse(string id)
+        {
+            _fixture.OrderRepositoryMock
+                .Setup(x => x.GetById(It.IsAny<string>()))
+                .Returns((Order)null);
+
+            var result = _fixture.OrderService.GetOrderById(id);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void GetOrderById_InvalidOrder_ReturnOrder()
+        {
+            string id = "66f037e7a04b71bfcaad6487";
+            _fixture.OrderRepositoryMock
+                .Setup(x => x.GetById(id))
+                .Returns(new Order { Id=id,CustomerId=1,OrderDate=DateTime.Now,OrderStatus=Domain.Enums.OrderStatus.Completed,TotalAmount=1000,OrderItems= new List<OrderItem> { new OrderItem { Price=50,ProductId= "66f037e7a04b71bfcaad6483",Quantity=20 } } });
+
+            var result = _fixture.OrderService.GetOrderById(id);
+
+            Assert.NotNull(result);
+            Assert.IsType<OrderModel>(result);
+        }
+        #endregion
+
     }
 }
