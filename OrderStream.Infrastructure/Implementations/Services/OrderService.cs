@@ -195,7 +195,7 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public bool ChangeOrderStatus(string orderId, OrderStatus newStatus)
         {
-            if (orderId == null) return false;
+            if (string.IsNullOrEmpty(orderId)) return false;
 
             var existingOrder = _orderRepository.GetById(orderId);
             if (existingOrder == null) return false;
