@@ -555,5 +555,186 @@ namespace OrderStream.Tests.ServiceTests
             Assert.Empty(result);
         }
         #endregion
+
+        #region UpdateOrderItems
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void UpdateOrderItems_OrderId_IsNullOrEmpty_ReturnFalse(string id)
+        {
+            var result = _fixture.OrderService.UpdateOrderItems(id, new List<OrderItemModel>());
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void UpdateOrderItems_OrderItems_IsNullOrEmpty_ReturnFalse()
+        {
+            var result = _fixture.OrderService.UpdateOrderItems("66f037e7a04b71bfcaad6487", new List<OrderItemModel>());
+
+            Assert.False(result);
+        }
+
+        [Theory]
+        [InlineData("66f037e7a04b71bfcaad6487")]
+        public void UpdateOrderItems_NotExistingOrder_ReturnFalse(string orderId)
+        {
+            var orderItems = _fixture.CreateModelInstance<List<OrderItemModel>>();
+            orderItems = new List<OrderItemModel> { new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 10 } };
+
+            _fixture.OrderRepositoryMock
+                .Setup(x => x.GetById(It.IsAny<string>()))
+                .Returns((Order)null);
+
+
+            var result = _fixture.OrderService.UpdateOrderItems(orderId, orderItems);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void UpdateOrderItems_GetByIdProductNull_ReturnFalse()
+        {
+            string orderId = "66f037e7a04b71bfcaad6487";
+
+            var orderItems = _fixture.CreateModelInstance<List<OrderItemModel>>();
+            orderItems = new List<OrderItemModel> { new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 10 } };
+
+
+            _fixture.OrderRepositoryMock
+                .Setup(x => x.GetById(It.IsAny<string>()))
+                .Returns(new Order { Id = orderId, CustomerId = 1, OrderDate = DateTime.Now, OrderStatus = Domain.Enums.OrderStatus.Completed, TotalAmount = 1000, OrderItems = new List<OrderItem> { new OrderItem { Price = 50, ProductId = "66f037e7a04b71bfcaad6483", Quantity = 20 } } });
+
+            _fixture.ProductRepositoryMock.Setup(x => x.GetById(It.IsAny<string>()))
+                .Returns((Product)null);
+
+
+            var result = _fixture.OrderService.UpdateOrderItems(orderId, orderItems);
+
+
+            Assert.False(result);
+
+            #endregion
+        }
+
+        [Fact]
+        public void UpdateOrderItems_GetByProduct_StockQuantityLessThanItemQuantity_ReturnFalse()
+        {
+            string orderId = "66f037e7a04b71bfcaad6487";
+
+            var orderItems = _fixture.CreateModelInstance<List<OrderItemModel>>();
+            orderItems = new List<OrderItemModel> { new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 10 } };
+
+
+            var order = _fixture.CreateModelInstance<Order>();
+
+            order = new Order { Id = orderId, CustomerId = 1, OrderDate = DateTime.Now, OrderStatus = Domain.Enums.OrderStatus.Completed, TotalAmount = 1000, OrderItems = new List<OrderItem> { new OrderItem { Price = 50, ProductId = "66f037e7a04b71bfcaad6483", Quantity = 20 } } };
+
+            _fixture.OrderRepositoryMock
+                .Setup(x => x.GetById(It.IsAny<string>()))
+                .Returns(order);
+
+            var product = _fixture.CreateModelInstance<Product>();
+            product = new Product { StockQuantity = 9, Name = "Test", Id = "66f037e7a04b71bfcaad6487" };
+
+            _fixture.ProductRepositoryMock
+                .Setup(x => x.GetById(It.IsAny<string>()))
+                .Returns(product);
+
+            var result = _fixture.OrderService.UpdateOrderItems(orderId, orderItems);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void UpdateOrderItems_OrderItemQuantityLessThanZero_ReturnFalse()
+        {
+            string orderId = "66f037e7a04b71bfcaad6487";
+
+            var orderItems = _fixture.CreateModelInstance<List<OrderItemModel>>();
+            orderItems = new List<OrderItemModel> { new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = -1 }, new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 10 }, new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 5 } };
+
+            var result = _fixture.OrderService.UpdateOrderItems(orderId, orderItems);
+
+            Assert.False(result);
+
+        }
+
+        [Fact]
+        public void UpdateOrderItems_OrderItemQuantityEqualZero_ReturnFalse()
+        {
+            string orderId = "66f037e7a04b71bfcaad6487";
+
+            var orderItems = _fixture.CreateModelInstance<List<OrderItemModel>>();
+            orderItems = new List<OrderItemModel> { new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = -1 }, new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 10 }, new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 0 } };
+
+            var result = _fixture.OrderService.UpdateOrderItems(orderId, orderItems);
+
+            Assert.False(result);
+
+        }
+
+
+        [Fact]
+        public void UpdateOrderItems_OrderItemPriceLessThanZero_ReturnFalse()
+        {
+            string orderId = "66f037e7a04b71bfcaad6487";
+
+            var orderItems = _fixture.CreateModelInstance<List<OrderItemModel>>();
+            orderItems = new List<OrderItemModel> { new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = -1 }, new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 10 }, new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 5 } };
+
+            var result = _fixture.OrderService.UpdateOrderItems(orderId, orderItems);
+
+            Assert.False(result);
+
+        }
+
+        [Fact]
+        public void UpdateOrderItems_OrderItemPriceEqualZero_ReturnFalse()
+        {
+            string orderId = "66f037e7a04b71bfcaad6487";
+
+            var orderItems = _fixture.CreateModelInstance<List<OrderItemModel>>();
+            orderItems = new List<OrderItemModel> { new OrderItemModel { Price = 0, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 10 }, new OrderItemModel { Price = -1, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 10 }, new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 10 } };
+
+            var result = _fixture.OrderService.UpdateOrderItems(orderId, orderItems);
+
+            Assert.False(result);
+
+        }
+
+        [Fact]
+        public void UpdateOrderItems_ValidOrder_ReturnTrue()
+        {
+            string orderId = "66f037e7a04b71bfcaad6487";
+
+            var orderItems = _fixture.CreateModelInstance<List<OrderItemModel>>();
+
+            orderItems = new List<OrderItemModel> { new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 10 }, new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 10 }, new OrderItemModel { Price = 1500, ProductId = "66f037e7a04b71bfcaad6487", Quantity = 10 } };
+
+
+            var order = _fixture.CreateModelInstance<Order>();
+
+            order = new Order { Id = orderId, CustomerId = 1, OrderDate = DateTime.Now, OrderStatus = Domain.Enums.OrderStatus.Completed, TotalAmount = 1000, OrderItems = new List<OrderItem> { new OrderItem { Price = 50, ProductId = "66f037e7a04b71bfcaad6483", Quantity = 20 } } };
+
+            _fixture.OrderRepositoryMock
+                .Setup(x => x.GetById(It.IsAny<string>()))
+                .Returns(order);
+
+            var product = _fixture.CreateModelInstance<Product>();
+            product = new Product { StockQuantity = 50, Name = "Test", Id = "66f037e7a04b71bfcaad6487" };
+
+            _fixture.ProductRepositoryMock
+                .Setup(x => x.GetById(It.IsAny<string>()))
+                .Returns(product);
+
+            _fixture.OrderRepositoryMock
+                .Setup(x => x.Update(It.IsAny<Order>()))
+                .Returns(true);
+
+            var result = _fixture.OrderService.UpdateOrderItems(orderId, orderItems);
+
+            Assert.True(result);
+        }
     }
 }

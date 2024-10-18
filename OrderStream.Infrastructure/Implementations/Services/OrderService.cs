@@ -173,13 +173,21 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
             if (updatedItems == null || !updatedItems.Any()) return false;
 
+            var quantityCheck = updatedItems.Any(i => i.Quantity <= 0);
+            if (quantityCheck) return false;
+
+            var priceCheck = updatedItems.Any(i => i.Price <= 0); // Fiyat kontrolü
+            if (priceCheck) return false;
+
             var existingOrder = _orderRepository.GetById(orderId);
-            if (existingOrder == null) return false;
+                if (existingOrder == null) return false;
+
 
             foreach (var item in updatedItems)
             {
                 var product = _productRepository.GetById(item.ProductId);
                 if (product == null || product.StockQuantity < item.Quantity) return false;
+              
             }
 
             existingOrder.OrderItems = updatedItems.Select(i => new OrderItem
