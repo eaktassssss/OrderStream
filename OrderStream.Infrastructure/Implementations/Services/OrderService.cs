@@ -100,6 +100,8 @@ namespace OrderStream.Infrastructure.Implementations.Services
 
         public IEnumerable<OrderModel> GetOrdersByCustomer(int customerId)
         {
+            if(customerId<=0) return null;
+
             return _orderRepository.GetAll().Where(o => o.CustomerId == customerId).Select(order => new OrderModel
             {
                 CustomerId = order.CustomerId,
@@ -180,13 +182,15 @@ namespace OrderStream.Infrastructure.Implementations.Services
             if (priceCheck) return false;
 
             var existingOrder = _orderRepository.GetById(orderId);
-                if (existingOrder == null) return false;
+                if (existingOrder == null) 
+                return false;
 
 
             foreach (var item in updatedItems)
             {
                 var product = _productRepository.GetById(item.ProductId);
-                if (product == null || product.StockQuantity < item.Quantity) return false;
+                if (product == null || product.StockQuantity < item.Quantity)
+                    return false;
               
             }
 
